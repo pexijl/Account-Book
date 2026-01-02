@@ -11,7 +11,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [Colors.purple[400]!, Colors.indigo[400]!],
