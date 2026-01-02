@@ -10,6 +10,9 @@ class AddTransactionScreen extends StatefulWidget {
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      appBar: AppBar(title: const Text('添加交易')),
+      body: const Center(child: Text('添加交易页面内容')),
+    );
   }
 }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:account_book/models/transaction.dart';
+import 'package:account_book/services/hive_transaction_service.dart';
 
 class RecentTransactions extends StatefulWidget {
   const RecentTransactions({super.key});
@@ -8,6 +11,14 @@ class RecentTransactions extends StatefulWidget {
 }
 
 class _RecentTransactionsState extends State<RecentTransactions> {
+  final HiveTransactionService _transactionService = HiveTransactionService();
+
+  @override
+  void initState() {
+    super.initState();
+    _transactionService.init();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -42,14 +53,42 @@ class _RecentTransactionsState extends State<RecentTransactions> {
                   ),
                 ],
               ),
-              child: ListView.builder(
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: Icon(Icons.monetization_on),
-                    title: Text('交易项 ${index + 1}'),
-                    subtitle: Text('2026-03-15'),
-                    trailing: Text('-¥123.45'),
+              child: ValueListenableBuilder<Box<Transaction>>(
+                valueListenable: Hive.box<Transaction>('transactions_box').listenable(),
+                builder: (context, box, _) {
+                  final transactions = box.values.toList();
+                  // 按日期降序排序
+                  transactions.sort((a, b) => b.date.compareTo(a.date));
+                  
+                  if (transactions.isEmpty) {
+                    return const Center(child: Text('暂无交易记录'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: transactions.length > 10 ? 10 : transactions.length,
+                    itemBuilder: (context, index) {
+                      final transaction = transactions[index];
+                      final isExpense = transaction.type == TransactionType.expense;
+                      
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: isExpense ? Colors.red[50] : Colors.green[50],
+                          child: Icon(
+                            isExpense ? Icons.remove : Icons.add,
+                            color: isExpense ? Colors.red : Colors.green,
+                          ),
+                        ),
+                        title: Text(transaction.category),
+                        subtitle: Text(transaction.date.toString().split(' ')[0]),
+                        trailing: Text(
+                          '${isExpense ? '-' : '+'}¥${transaction.amount.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color: isExpense ? Colors.red : Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
