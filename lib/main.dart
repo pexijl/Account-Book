@@ -2,10 +2,13 @@ import 'package:account_book/screens/main/main_screen.dart';
 import 'package:account_book/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'models/transaction.dart'; // 导入交易模型
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // final directory = await getApplicationDocumentsDirectory();
+  // print("Hive 存储路径: ${directory.path}"); // 这会直接告诉你它在哪
 
   // 1. 初始化 Hive
   await Hive.initFlutter();

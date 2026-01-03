@@ -29,6 +29,7 @@ class HiveTransactionService {
   /// 添加交易记录
   /// 如果 id 已存在，会覆盖原有记录
   Future<void> addTransaction(Transaction transaction) async {
+    print('添加交易记录: $transaction');
     await box.put(transaction.id, transaction);
   }
 
