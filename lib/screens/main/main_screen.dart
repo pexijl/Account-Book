@@ -1,20 +1,18 @@
-import 'package:account_book/screens/assets/assets_screen.dart';
-import 'package:account_book/screens/home/home_screen.dart';
-import 'package:account_book/screens/report/report_screen.dart';
-import 'package:account_book/screens/settings/settings_screen.dart';
-import 'package:account_book/screens/transaction/transaction_list_screen.dart';
-import 'package:account_book/app/components/custom_bottom_nav_bar.dart';
-import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:account_book/screens/main/widgets/assets/assets_screen.dart';
+import 'package:account_book/screens/main/widgets/home/home_screen.dart';
+import 'package:account_book/screens/main/widgets/profile/profile.dart';
+import 'package:account_book/screens/main/widgets/report/report_screen.dart';
+import 'package:account_book/screens/main/widgets/custom_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 
-class App extends StatefulWidget {
-  const App({super.key});
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
 
   @override
-  State<App> createState() => _AppState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _AppState extends State<App> {
+class _MainScreenState extends State<MainScreen> {
   // 当前选中的页面索引
   int _currentIndex = 0;
 
@@ -23,7 +21,7 @@ class _AppState extends State<App> {
     const HomeScreen(),
     const ReportScreen(),
     const AssetsScreen(),
-    const SettingsScreen(),
+    const Profile(),
   ];
 
   // 导航列表
@@ -31,7 +29,7 @@ class _AppState extends State<App> {
     BottomNavItem(icon: Icons.home, label: '首页'),
     BottomNavItem(icon: Icons.bar_chart, label: '统计'),
     BottomNavItem(icon: Icons.account_balance_wallet, label: '资产'),
-    BottomNavItem(icon: Icons.settings, label: '设置'),
+    BottomNavItem(icon: Icons.person, label: '我的'),
   ];
 
   @override
@@ -49,14 +47,7 @@ class _AppState extends State<App> {
             });
           },
           onAddPressed: () {
-            print('添加');
-            // TODO: 打开添加记账页面
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => const TransactionListScreen(),
-            //   ),
-            // );
+            Navigator.pushNamed(context, '/addTransaction');
           },
         ),
         body: IndexedStack(index: _currentIndex, children: _screens),

@@ -1,5 +1,5 @@
-import 'package:account_book/screens/home/components/dashboard.dart';
-import 'package:account_book/screens/home/components/recent_transactions.dart';
+import 'package:account_book/screens/main/widgets/home/widgets/dashboard.dart';
+import 'package:account_book/screens/main/widgets/home/widgets/recent_transactions.dart';
 import 'package:account_book/widgets/transaction/quick_add_sheet.dart';
 import 'package:account_book/services/storage_service.dart';
 import 'package:flutter/material.dart';

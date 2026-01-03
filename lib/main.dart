@@ -1,4 +1,5 @@
-import 'package:account_book/app/app.dart';
+import 'package:account_book/screens/main/main_screen.dart';
+import 'package:account_book/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'models/transaction.dart'; // 导入交易模型
@@ -18,5 +19,5 @@ Future<void> main() async {
   await Hive.openBox('settings');
   await Hive.openBox<Transaction>('transactions_box');
 
-  runApp(App());
+  runApp(Routes());
 }

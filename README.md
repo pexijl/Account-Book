@@ -11,10 +11,8 @@ finance_tracker/
 ├── lib/
 │   ├── main.dart              # 应用入口
 │   ├── app/                   # 应用配置
-│   │   ├── app.dart           # 主应用Widget
 │   │   ├── constants.dart     # 应用常量
 │   │   ├── theme.dart         # 主题配置
-│   │   └── routes.dart        # 路由配置
 │   ├── models/                # 数据模型
 │   │   ├── transaction.dart   # 交易模型
 │   │   ├── category.dart      # 分类模型
@@ -32,25 +30,20 @@ finance_tracker/
 │   │   ├── budget_service.dart
 │   │   ├── report_service.dart
 │   │   └── notification_service.dart
-│   ├── screens/               # 页面/屏幕
-│   │   ├── home/             # 首页相关
-│   │   │   ├── home_screen.dart
-│   │   │   └── home_viewmodel.dart
-│   │   ├── transaction/       # 交易页面
-│   │   │   ├── add_transaction_screen.dart
-│   │   │   ├── transaction_list_screen.dart
-│   │   │   └── transaction_detail_screen.dart
-│   │   ├── category/          # 分类管理
-│   │   │   ├── category_manage_screen.dart
-│   │   │   └── category_edit_screen.dart
-│   │   ├── report/           # 报表页面
-│   │   │   ├── report_screen.dart
-│   │   │   ├── chart_screen.dart
-│   │   │   └── statistics_screen.dart
-│   │   ├── budget/           # 预算页面
-│   │   │   └── budget_screen.dart
+│   ├── screens/              # UI页面
+│   │   ├── category/         # 分类管理
+│   │   ├── main/             # 主页面
+│   │   │   ├── widgets/           # 主页面组件
+│   │   │   │   ├── assets/         # 资产页面组件
+│   │   │   │   ├── home/           # 首页组件
+│   │   │   │   ├── profile/        # 个人中心组件
+│   │   │   │   ├── report/         # 报表页面组件
+│   │   │   │   ├── bottom_nav_bar.dart  # 底部导航栏
+│   │   │   └── main_screen.dart     # 主页面
 │   │   └── settings/         # 设置页面
-│   │       └── settings_screen.dart
+│   │   ├── transaction/      # 交易页面
+│   ├── router/               # 路由管理
+│   │   └── routes.dart        # 路由配置
 │   ├── widgets/              # 可复用组件
 │   │   ├── common/           # 通用组件
 │   │   │   ├── app_button.dart
