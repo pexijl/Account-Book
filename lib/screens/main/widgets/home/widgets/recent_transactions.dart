@@ -13,10 +13,14 @@ class RecentTransactions extends StatefulWidget {
 class _RecentTransactionsState extends State<RecentTransactions> {
   final HiveTransactionService _transactionService = HiveTransactionService();
 
+  Future<void> _initTransactionService() async {
+    await _transactionService.init();
+  }
+
   @override
   void initState() {
     super.initState();
-    _transactionService.init();
+    _initTransactionService();
   }
 
   @override
@@ -54,32 +58,41 @@ class _RecentTransactionsState extends State<RecentTransactions> {
                 ],
               ),
               child: ValueListenableBuilder<Box<Transaction>>(
-                valueListenable: Hive.box<Transaction>('transactions_box').listenable(),
+                valueListenable: Hive.box<Transaction>(
+                  'transactions_box',
+                ).listenable(),
                 builder: (context, box, _) {
                   final transactions = box.values.toList();
                   // 按日期降序排序
                   transactions.sort((a, b) => b.date.compareTo(a.date));
-                  
+
                   if (transactions.isEmpty) {
                     return const Center(child: Text('暂无交易记录'));
                   }
 
                   return ListView.builder(
-                    itemCount: transactions.length > 10 ? 10 : transactions.length,
+                    itemCount: transactions.length > 10
+                        ? 10
+                        : transactions.length,
                     itemBuilder: (context, index) {
                       final transaction = transactions[index];
-                      final isExpense = transaction.type == TransactionType.expense;
-                      
+                      final isExpense =
+                          transaction.type == TransactionType.expense;
+
                       return ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: isExpense ? Colors.red[50] : Colors.green[50],
+                          backgroundColor: isExpense
+                              ? Colors.red[50]
+                              : Colors.green[50],
                           child: Icon(
                             isExpense ? Icons.remove : Icons.add,
                             color: isExpense ? Colors.red : Colors.green,
                           ),
                         ),
                         title: Text(transaction.category),
-                        subtitle: Text(transaction.date.toString().split(' ')[0]),
+                        subtitle: Text(
+                          transaction.date.toString().split(' ')[0],
+                        ),
                         trailing: Text(
                           '${isExpense ? '-' : '+'}¥${transaction.amount.toStringAsFixed(2)}',
                           style: TextStyle(

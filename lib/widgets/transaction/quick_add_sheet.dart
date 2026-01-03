@@ -64,13 +64,13 @@ class _QuickAddSheetState extends State<QuickAddSheet> {
     }
 
     // 生成唯一ID (使用时间戳)
-    final id = DateTime.now().millisecondsSinceEpoch;
+    // final id = DateTime.now().millisecondsSinceEpoch;
 
     final transaction = Transaction(
-      id: id,
       amount: amount,
-      category: _selectedCategory,
       date: _selectedDate,
+      method: '现金', // TODO: 添加支付方式
+      category: _selectedCategory,
       note: _noteController.text.isNotEmpty ? _noteController.text : null,
       type: _selectedType,
     );
