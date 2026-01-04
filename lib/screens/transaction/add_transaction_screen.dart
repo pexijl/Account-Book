@@ -31,6 +31,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen>
       appBar: AppBar(
         title: const Text('添加账单'),
         bottom: TabBar(controller: _tabController, tabs: _tabs),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {},
+            tooltip: '设置',
+          ),
+        ],
       ),
       body: TabBarView(controller: _tabController, children: _tabPages),
     );

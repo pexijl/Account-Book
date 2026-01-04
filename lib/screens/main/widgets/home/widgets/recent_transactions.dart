@@ -62,6 +62,7 @@ class _RecentTransactionsState extends State<RecentTransactions> {
                   'transactions_box',
                 ).listenable(),
                 builder: (context, box, _) {
+                  // TODO: 实现懒加载
                   final transactions = box.values.toList();
                   // 按日期降序排序
                   transactions.sort((a, b) => b.date.compareTo(a.date));
