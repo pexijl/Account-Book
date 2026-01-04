@@ -1,7 +1,8 @@
+import 'package:account_book/di/locators.dart';
+import 'package:account_book/services/transaction_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:account_book/models/transaction.dart';
-import 'package:account_book/services/hive_transaction_service.dart';
 
 class RecentTransactions extends StatefulWidget {
   const RecentTransactions({super.key});
@@ -11,16 +12,11 @@ class RecentTransactions extends StatefulWidget {
 }
 
 class _RecentTransactionsState extends State<RecentTransactions> {
-  final HiveTransactionService _transactionService = HiveTransactionService();
-
-  Future<void> _initTransactionService() async {
-    await _transactionService.init();
-  }
+  final _transactionService = getIt<TransactionService>(); // 通过 GetIt 获取服务
 
   @override
   void initState() {
     super.initState();
-    _initTransactionService();
   }
 
   @override
@@ -39,7 +35,12 @@ class _RecentTransactionsState extends State<RecentTransactions> {
                   '最近交易',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                TextButton(onPressed: () {}, child: Text('查看全部')),
+                TextButton(
+                  onPressed: () {
+                    _transactionService.debugExportAsJson();
+                  },
+                  child: Text('查看全部'),
+                ),
               ],
             ),
           ),
@@ -58,36 +59,26 @@ class _RecentTransactionsState extends State<RecentTransactions> {
                 ],
               ),
               child: ValueListenableBuilder<Box<Transaction>>(
-                valueListenable: Hive.box<Transaction>(
-                  'transactions_box',
-                ).listenable(),
+                valueListenable: _transactionService.listenable(),
                 builder: (context, box, _) {
-                  // TODO: 实现懒加载
                   final transactions = box.values.toList();
                   // 按日期降序排序
                   transactions.sort((a, b) => b.date.compareTo(a.date));
-
                   if (transactions.isEmpty) {
                     return const Center(child: Text('暂无交易记录'));
                   }
-
                   return ListView.builder(
                     itemCount: transactions.length > 10
                         ? 10
                         : transactions.length,
                     itemBuilder: (context, index) {
                       final transaction = transactions[index];
-                      final isExpense =
-                          transaction.type == TransactionType.expense;
-
                       return ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: isExpense
-                              ? Colors.red[50]
-                              : Colors.green[50],
+                          backgroundColor: transaction.type.backgroundColor,
                           child: Icon(
-                            isExpense ? Icons.remove : Icons.add,
-                            color: isExpense ? Colors.red : Colors.green,
+                            transaction.type.icon,
+                            color: transaction.type.color,
                           ),
                         ),
                         title: Text(transaction.category),
@@ -95,9 +86,14 @@ class _RecentTransactionsState extends State<RecentTransactions> {
                           transaction.date.toString().split(' ')[0],
                         ),
                         trailing: Text(
-                          '${isExpense ? '-' : '+'}¥${transaction.amount.toStringAsFixed(2)}',
+                          '${transaction.type == TransactionType.expense
+                              ? '-'
+                              : transaction.type == TransactionType.income
+                              ? '+'
+                              : '⇆'}¥${transaction.amount.toStringAsFixed(2)}',
                           style: TextStyle(
-                            color: isExpense ? Colors.red : Colors.green,
+                            color: transaction.type.color,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

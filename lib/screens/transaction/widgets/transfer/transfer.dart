@@ -1,6 +1,7 @@
+import 'package:account_book/di/locators.dart';
 import 'package:account_book/models/transaction.dart';
 import 'package:account_book/screens/transaction/widgets/expense/widgets/custom_dropdown_menu.dart';
-import 'package:account_book/services/hive_transaction_service.dart';
+import 'package:account_book/services/transaction_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -19,7 +20,7 @@ class _TransferState extends State<Transfer> {
   String? _selectedFromAccount;
   String? _selectedToAccount;
   DateTime _selectedDate = DateTime.now();
-  final HiveTransactionService _transactionService = HiveTransactionService();
+  final _transactionService = getIt<TransactionService>();
 
   // 账户列表
   final List<DropdownMenuEntry<String>> _accounts = [
@@ -80,31 +81,31 @@ class _TransferState extends State<Transfer> {
   Future<void> _saveTransfer() async {
     final amount = double.tryParse(_amountController.text);
     if (amount == null || amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入有效的金额')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请输入有效的金额')));
       return;
     }
 
     if (_selectedFromAccount == null || _selectedToAccount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请选择转出和转入账户')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请选择转出和转入账户')));
       return;
     }
 
     if (_selectedFromAccount == _selectedToAccount) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('转出和转入账户不能相同')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('转出和转入账户不能相同')));
       return;
     }
 
     if (_formKey.currentState!.validate()) {
       if (_selectedCategory == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('请选择分类')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('请选择分类')));
         return;
       }
     }
@@ -117,22 +118,23 @@ class _TransferState extends State<Transfer> {
       note: _noteController.text.isEmpty
           ? '从 $_selectedFromAccount 转到 $_selectedToAccount'
           : _noteController.text,
-      method: '$_selectedFromAccount -> $_selectedToAccount',
+      fromAccount: _selectedFromAccount,
+      toAccount: _selectedToAccount,
     );
 
     try {
       await _transactionService.addTransaction(transaction);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('转账已保存')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('转账已保存')));
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
       }
     }
   }
@@ -219,9 +221,9 @@ class _TransferState extends State<Transfer> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .primaryColor
-                            .withValues(alpha: 0.1),
+                        color: Theme.of(
+                          context,
+                        ).primaryColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -319,9 +321,9 @@ class _TransferState extends State<Transfer> {
                           child: Container(
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? Theme.of(context)
-                                      .primaryColor
-                                      .withValues(alpha: 0.1)
+                                  ? Theme.of(
+                                      context,
+                                    ).primaryColor.withValues(alpha: 0.1)
                                   : Colors.grey[100],
                               borderRadius: BorderRadius.circular(12),
                               border: isSelected

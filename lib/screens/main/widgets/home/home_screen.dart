@@ -1,5 +1,7 @@
+import 'package:account_book/di/locators.dart';
 import 'package:account_book/screens/main/widgets/home/widgets/dashboard.dart';
 import 'package:account_book/screens/main/widgets/home/widgets/recent_transactions.dart';
+import 'package:account_book/services/transaction_service.dart';
 import 'package:account_book/widgets/transaction/quick_add_sheet.dart';
 import 'package:account_book/services/storage_service.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +19,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _transactionService = getIt<TransactionService>();
+
   @override
   void initState() {
     super.initState();
@@ -43,21 +47,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           // TODO: 其他操作按钮
-          // Container(
-          //   margin: const EdgeInsets.only(right: 16),
-          //   child: IconButton(
-          //     iconSize: 32,
-          //     icon: const Icon(Icons.add),
-          //     tooltip: '快速记账',
-          //     onPressed: () {
-          //       showModalBottomSheet(
-          //         context: context,
-          //         isScrollControlled: true,
-          //         builder: (context) => const QuickAddSheet(),
-          //       );
-          //     },
-          //   ),
-          // ),
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              iconSize: 32,
+              icon: const Icon(Icons.delete_forever),
+              tooltip: '清空交易',
+              onPressed: () {
+                _transactionService.clearAll();
+              },
+            ),
+          ),
         ],
       ),
       body: SafeArea(
@@ -69,7 +69,11 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 flex: 1,
                 child: Container(
-                  margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                  margin: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                  ),
                   alignment: Alignment.center,
                   child: Container(
                     decoration: BoxDecoration(

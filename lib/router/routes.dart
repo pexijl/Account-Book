@@ -22,7 +22,7 @@ class _RoutesState extends State<Routes> {
     return MaterialApp(
       title: 'Account Book',
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: '/addTransaction', // TODO: 重置回 '/'
+      initialRoute: '/', // TODO: 重置回 '/'
       routes: routes,
     );
   }
