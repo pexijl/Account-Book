@@ -1,6 +1,7 @@
+import 'package:account_book/di/locators.dart';
 import 'package:account_book/models/transaction.dart';
 import 'package:account_book/screens/transaction/widgets/expense/widgets/custom_dropdown_menu.dart';
-import 'package:account_book/services/hive_transaction_service.dart';
+import 'package:account_book/services/transaction_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -19,7 +20,7 @@ class _IncomeState extends State<Income> {
   String? _selectedCategory;
   String? _selectedPaymentMethod = '现金';
   DateTime _selectedDate = DateTime.now();
-  final HiveTransactionService _transactionService = HiveTransactionService();
+  final _transactionService = getIt<TransactionService>();
 
   // 收入方式列表
   final List<DropdownMenuEntry<String>> _paymentMethods = [
@@ -97,7 +98,7 @@ class _IncomeState extends State<Income> {
       category: _selectedCategory!,
       date: _selectedDate,
       note: _noteController.text.isEmpty ? null : _noteController.text,
-      method: _selectedPaymentMethod!,
+      toAccount: _selectedPaymentMethod,
     );
 
     try {

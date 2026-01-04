@@ -1,26 +1,26 @@
-import 'package:account_book/screens/main/main_screen.dart';
+import 'package:account_book/di/locators.dart';
 import 'package:account_book/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 import 'models/transaction.dart'; // 导入交易模型
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // final directory = await getApplicationDocumentsDirectory();
-  // print("Hive 存储路径: ${directory.path}"); // 这会直接告诉你它在哪
 
   // 1. 初始化 Hive
   await Hive.initFlutter();
 
-  // 2. 注册 TypeAdapter（生成适配器后取消注释）
-  // 注意：需要先运行 flutter packages pub run build_runner build
+  // await Hive.deleteBoxFromDisk('transactions_box'); // 重置数据盒子， 执行一次后删除或者注释掉
+
+  // 2. 注册适配器
   Hive.registerAdapter(TransactionAdapter());
   Hive.registerAdapter(TransactionTypeAdapter());
 
-  // 3. 打开 Box（可以预打开，也可以在使用时打开）
+  // 3. 执行 GetIt 初始化 (这会触发所有 Service 的 init)
+  await setupLocators();
+
+  // 4. 其他简单的配置 Box（如设置）可以留在这里或也存入 SettingService
   await Hive.openBox('settings');
-  await Hive.openBox<Transaction>('transactions_box');
 
   runApp(Routes());
 }

@@ -1,5 +1,6 @@
+import 'package:account_book/di/locators.dart';
 import 'package:account_book/models/transaction.dart';
-import 'package:account_book/services/hive_transaction_service.dart';
+import 'package:account_book/services/transaction_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -13,7 +14,7 @@ class QuickAddSheet extends StatefulWidget {
 class _QuickAddSheetState extends State<QuickAddSheet> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
-  final HiveTransactionService _transactionService = HiveTransactionService();
+  final _transactionService = getIt<TransactionService>();
 
   TransactionType _selectedType = TransactionType.expense;
   String _selectedCategory = '餐饮'; // 默认分类
@@ -66,10 +67,10 @@ class _QuickAddSheetState extends State<QuickAddSheet> {
     // 生成唯一ID (使用时间戳)
     // final id = DateTime.now().millisecondsSinceEpoch;
 
+    // TODO: 实现添加交易逻辑
     final transaction = Transaction(
       amount: amount,
       date: _selectedDate,
-      method: '现金', // TODO: 添加支付方式
       category: _selectedCategory,
       note: _noteController.text.isNotEmpty ? _noteController.text : null,
       type: _selectedType,
