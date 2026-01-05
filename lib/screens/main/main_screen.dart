@@ -38,17 +38,19 @@ class _MainScreenState extends State<MainScreen> {
       title: 'Account Book',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: Scaffold(
-        bottomNavigationBar: CustomBottomNavBar(
-          currentIndex: _currentIndex,
-          items: _navItems,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          onAddPressed: () {
-            Navigator.pushNamed(context, '/addTransaction');
-          },
+        bottomNavigationBar: SafeArea(
+          child: CustomBottomNavBar(
+            currentIndex: _currentIndex,
+            items: _navItems,
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+            onAddPressed: () {
+              Navigator.pushNamed(context, '/addTransaction');
+            },
+          ),
         ),
         body: IndexedStack(index: _currentIndex, children: _screens),
       ),
