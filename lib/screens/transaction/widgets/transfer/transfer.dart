@@ -166,7 +166,6 @@ class _TransferState extends State<Transfer> {
             // 金额输入
             Container(
               margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(color: Colors.white),
               child: TextFormField(
                 controller: _amountController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -179,10 +178,6 @@ class _TransferState extends State<Transfer> {
                   labelText: '金额',
                   prefixText: '¥ ',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 12,
-                  ),
                 ),
                 style: const TextStyle(
                   fontSize: 24,
@@ -202,7 +197,6 @@ class _TransferState extends State<Transfer> {
               margin: const EdgeInsets.only(bottom: 20),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -261,7 +255,6 @@ class _TransferState extends State<Transfer> {
             // 日期选择
             Container(
               margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(color: Colors.white),
               child: TextFormField(
                 readOnly: true,
                 onTap: () => _selectDate(context),
@@ -280,10 +273,6 @@ class _TransferState extends State<Transfer> {
 
             // 分类选择
             Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: Colors.white,
-              ),
               child: Column(
                 children: [
                   Container(
@@ -374,7 +363,6 @@ class _TransferState extends State<Transfer> {
             // 备注输入
             Container(
               margin: const EdgeInsets.only(top: 20, bottom: 40),
-              decoration: BoxDecoration(color: Colors.white),
               child: TextFormField(
                 controller: _noteController,
                 decoration: const InputDecoration(

@@ -125,7 +125,6 @@ class _IncomeState extends State<Income> {
             // 金额输入
             Container(
               margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(color: Colors.white),
               child: TextFormField(
                 controller: _amountController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -138,10 +137,6 @@ class _IncomeState extends State<Income> {
                   labelText: '金额',
                   prefixText: '¥ ',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 12,
-                  ),
                 ),
                 style: const TextStyle(
                   fontSize: 24,
@@ -164,7 +159,6 @@ class _IncomeState extends State<Income> {
                     flex: 1,
                     child: Container(
                       margin: const EdgeInsets.only(right: 8),
-                      decoration: BoxDecoration(color: Colors.white),
                       child: TextFormField(
                         readOnly: true, // 防止调起系统键盘
                         onTap: () => _selectDate(context),
@@ -188,7 +182,6 @@ class _IncomeState extends State<Income> {
                     flex: 1,
                     child: Container(
                       margin: const EdgeInsets.only(left: 8),
-                      decoration: BoxDecoration(color: Colors.white),
                       child: CustomDropdownMenu<String>(
                         title: '收入方式',
                         icon: Icons.payment,
@@ -207,10 +200,6 @@ class _IncomeState extends State<Income> {
             ),
             // 分类选择
             Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: Colors.white,
-              ),
               child: Column(
                 children: [
                   Container(
@@ -301,7 +290,6 @@ class _IncomeState extends State<Income> {
             // 备注输入
             Container(
               margin: const EdgeInsets.only(top: 20, bottom: 40),
-              decoration: BoxDecoration(color: Colors.white),
               child: TextFormField(
                 controller: _noteController,
                 decoration: const InputDecoration(

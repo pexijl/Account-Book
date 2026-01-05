@@ -28,41 +28,41 @@ class _RecentTransactionsState extends State<RecentTransactions> {
         children: [
           _buildHeader(),
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.8),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.1),
-                    spreadRadius: 1,
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: StreamBuilder<List<Transaction>>(
-                stream: _transactionService.watchRecentTransactions(10),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+            child: StreamBuilder<List<Transaction>>(
+              stream: _transactionService.watchRecentTransactions(100),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                  final transactions = snapshot.data ?? [];
+                final transactions = snapshot.data ?? [];
 
-                  if (transactions.isEmpty) {
-                    return const Center(child: Text('暂无交易记录'));
-                  }
+                if (transactions.isEmpty) {
+                  return const Center(child: Text('暂无交易记录'));
+                }
 
-                  return ListView.builder(
-                    padding: EdgeInsets.zero,
-                    itemCount: transactions.length,
-                    itemBuilder: (context, index) {
-                      final transaction = transactions[index];
+                return ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: transactions.length,
+                  itemBuilder: (context, index) {
+                    final transaction = transactions[index];
 
-                      // 注意：Drift 生成的 Transaction 对象字段名
-                      // 与你在 tables.dart 中定义的一致
-                      return ListTile(
+                    // 注意：Drift 生成的 Transaction 对象字段名
+                    // 与你在 tables.dart 中定义的一致
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withValues(alpha: 0.1),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: const Offset(0, 2), // 阴影位置
+                          ),
+                        ],
+                      ),
+                      child: ListTile(
                         leading: CircleAvatar(
                           // 这里假设你在 TransactionType 枚举里定义了扩展方法处理颜色和图标
                           backgroundColor: _getBackgroundColor(
@@ -85,11 +85,11 @@ class _RecentTransactionsState extends State<RecentTransactions> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
