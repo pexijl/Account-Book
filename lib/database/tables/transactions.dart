@@ -1,6 +1,5 @@
-import 'package:account_book/data/app_database.dart';
+import 'package:account_book/models/enums.dart';
 import 'package:drift/drift.dart';
-
 
 class Transactions extends Table {
   /// ID

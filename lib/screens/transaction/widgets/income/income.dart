@@ -1,5 +1,6 @@
-import 'package:account_book/data/app_database.dart';
+import 'package:account_book/database/app_database.dart';
 import 'package:account_book/di/locators.dart';
+import 'package:account_book/models/enums.dart';
 import 'package:account_book/screens/transaction/widgets/expense/widgets/custom_dropdown_menu.dart';
 import 'package:account_book/services/transaction_service.dart';
 import 'package:drift/drift.dart' as drift;
@@ -88,19 +89,15 @@ class _IncomeState extends State<Income> {
       }
     }
 
-    final entry = TransactionsCompanion.insert(
-      amount: double.parse(_amountController.text),
-      date: _selectedDate,
-      category: _selectedCategory!,
-      type: TransactionType.income,
-      note: drift.Value(
-        _noteController.text.isEmpty ? null : _noteController.text,
-      ),
-      toAccount: drift.Value(_selectedPaymentMethod),
-    );
-
     try {
-      await _transactionService.insertTransaction(entry);
+      await _transactionService.addTransaction(
+        amount: amount,
+        date: _selectedDate,
+        category: _selectedCategory!,
+        type: TransactionType.income,
+        toAccount: _selectedPaymentMethod,
+        note: _noteController.text,
+      );
       if (mounted) {
         ScaffoldMessenger.of(
           context,

@@ -1,5 +1,6 @@
-import 'package:account_book/data/app_database.dart';
+import 'package:account_book/database/app_database.dart';
 import 'package:account_book/di/locators.dart';
+import 'package:account_book/models/enums.dart';
 import 'package:account_book/services/transaction_service.dart';
 import 'package:flutter/material.dart';
 
@@ -41,7 +42,7 @@ class _RecentTransactionsState extends State<RecentTransactions> {
                 ],
               ),
               child: StreamBuilder<List<Transaction>>(
-                stream: _transactionService.watchRecentTransactions(),
+                stream: _transactionService.watchRecentTransactions(10),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -127,7 +128,6 @@ class _RecentTransactionsState extends State<RecentTransactions> {
           TextButton(
             onPressed: () {
               // TODO: 跳转全部页面
-              _transactionService.debugPrintAllAsJson();
             },
             child: const Text('查看全部'),
           ),

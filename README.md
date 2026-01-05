@@ -18,9 +18,12 @@ account_book/
 │   │   ├── budget.dart        # 预算模型
 │   │   ├── category.dart      # 分类模型
 │   │   └── transaction.dart   # 交易模型
-│   ├── data/                  # 数据层
-│   │   ├── dao/          # 数据访问对象
-│   │   ├── app_database.dart  # 数据库（SQLite）
+│   ├── database/                  # 数据层
+│   │   ├── tables/            # 数据表定义
+│   │   └── app_database.dart  # 数据库（SQLite）
+│   ├── di/                  # get_it 配置
+│   ├── repositories/                  # 仓库层
+│   │   └──  transaction_repository.dart # 交易数据仓库
 │   ├── services/              # 业务逻辑层
 │   │   ├── budget_service.dart
 │   │   ├── category_service.dart
@@ -79,7 +82,6 @@ account_book/
 └── README.md
 ```
 
-
 敏感信息（Token）: flutter_secure_storage
 应用设置: shared_preferences
 业务相关: drift
@@ -96,4 +98,16 @@ account_book/
 
 ```cmd
 flutter pub run build_runner build --delete-conflicting-outputs
+```
+
+```
+层次,操作类型,返回值建议,理由
+Repository,基础查询,Stream<List<T>>,提供响应式数据源
+Repository,基础增删改,Future<int/void>,数据库操作是瞬间任务
+Service,复杂逻辑聚合,Stream<CustomModel>,将多个 Repo 的流合并（如 SurplusStream）
+Service,业务流程,Future<Result>,比如“保存并关闭页面”这种逻辑流
+
+总结建议
+UI 层的 ListView 和 Text 数字：全部接入 Stream。
+点击按钮后的 save 逻辑：全部使用 Future。
 ```

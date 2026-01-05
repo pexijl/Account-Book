@@ -1,4 +1,5 @@
-import 'package:account_book/data/app_database.dart';
+import 'package:account_book/database/app_database.dart';
+import 'package:account_book/repositories/transaction_repository.dart';
 import 'package:account_book/services/transaction_service.dart';
 import 'package:get_it/get_it.dart' show GetIt;
 
@@ -9,5 +10,10 @@ Future<void> setupLocators() async {
   getIt.registerSingleton<AppDatabase>(AppDatabase());
 
   // 2. 必须手动注册你的 Service！
-  getIt.registerLazySingleton<TransactionService>(() => TransactionService());
+  getIt.registerLazySingleton<TransactionRepository>(
+    () => TransactionRepository(),
+  ); // 注册仓库
+  getIt.registerLazySingleton<TransactionService>(
+    () => TransactionService(),
+  ); // 注册服务
 }

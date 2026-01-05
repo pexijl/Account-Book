@@ -1,5 +1,6 @@
-import 'package:account_book/data/app_database.dart';
+import 'package:account_book/database/app_database.dart';
 import 'package:account_book/di/locators.dart';
+import 'package:account_book/models/enums.dart';
 import 'package:account_book/services/transaction_service.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
@@ -78,7 +79,13 @@ class _QuickAddSheetState extends State<QuickAddSheet> {
       // toAccount: drift.Value(_selectedPaymentMethod),
     );
 
-    await _transactionService.insertTransaction(entry);
+    await _transactionService.addTransaction(
+      amount: double.parse(_amountController.text),
+      date: _selectedDate,
+      category: _selectedCategory,
+      type: _selectedType,
+      note: _noteController.text.isEmpty ? null : _noteController.text,
+    );
 
     if (mounted) {
       Navigator.pop(context, true); // 返回true表示保存成功
