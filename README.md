@@ -19,11 +19,8 @@ account_book/
 │   │   ├── category.dart      # 分类模型
 │   │   └── transaction.dart   # 交易模型
 │   ├── data/                  # 数据层
-│   │   ├── local/            # 本地数据
-│   │   │   ├── database.dart  # 数据库（SQLite）
-│   │   │   ├── dao/          # 数据访问对象
-│   │   │   └── repositories/  # 本地仓库实现
-│   │   └── repositories/      # 仓库接口
+│   │   ├── dao/          # 数据访问对象
+│   │   ├── app_database.dart  # 数据库（SQLite）
 │   ├── services/              # 业务逻辑层
 │   │   ├── budget_service.dart
 │   │   ├── category_service.dart
@@ -87,3 +84,16 @@ account_book/
 应用设置: shared_preferences
 业务相关: drift
 导出报表: path_provider
+
+# drift 使用指南
+
+创建数据库文件：
+
+1. 创建数据库文件 `lib/database/app_database.dart`，定义数据表和DAO。
+2. 创建表 `lib/database/tables/` 目录下的Dart文件，定义数据表结构。
+
+运行命令：
+
+```cmd
+flutter pub run build_runner build --delete-conflicting-outputs
+```

@@ -1,6 +1,7 @@
+import 'package:account_book/data/app_database.dart';
 import 'package:account_book/di/locators.dart';
-import 'package:account_book/models/transaction.dart';
 import 'package:account_book/services/transaction_service.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -36,8 +37,6 @@ class _QuickAddSheetState extends State<QuickAddSheet> {
   @override
   void initState() {
     super.initState();
-    // 确保服务已初始化（通常在main中已初始化，这里作为安全检查或直接使用已打开的box）
-    _transactionService.init();
   }
 
   @override
@@ -68,15 +67,18 @@ class _QuickAddSheetState extends State<QuickAddSheet> {
     // final id = DateTime.now().millisecondsSinceEpoch;
 
     // TODO: 实现添加交易逻辑
-    final transaction = Transaction(
-      amount: amount,
+    final entry = TransactionsCompanion.insert(
+      amount: double.parse(_amountController.text),
       date: _selectedDate,
-      category: _selectedCategory,
-      note: _noteController.text.isNotEmpty ? _noteController.text : null,
-      type: _selectedType,
+      category: _selectedCategory!,
+      type: TransactionType.income,
+      note: drift.Value(
+        _noteController.text.isEmpty ? null : _noteController.text,
+      ),
+      // toAccount: drift.Value(_selectedPaymentMethod),
     );
 
-    await _transactionService.addTransaction(transaction);
+    await _transactionService.insertTransaction(entry);
 
     if (mounted) {
       Navigator.pop(context, true); // 返回true表示保存成功

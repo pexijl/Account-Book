@@ -48,7 +48,8 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.delete_forever),
               tooltip: '清空交易',
               onPressed: () {
-                _transactionService.clearAll();
+                // TODO: 清空交易
+                // _transactionService.clearAll();
               },
             ),
           ),

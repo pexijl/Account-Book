@@ -1,7 +1,8 @@
+import 'package:account_book/data/app_database.dart';
 import 'package:account_book/di/locators.dart';
-import 'package:account_book/models/transaction.dart';
 import 'package:account_book/screens/transaction/widgets/expense/widgets/custom_dropdown_menu.dart';
 import 'package:account_book/services/transaction_service.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -87,16 +88,19 @@ class _ExpenseState extends State<Expense> {
       }
     }
 
-    final transaction = Transaction.expense(
-      amount: amount,
-      category: _selectedCategory!,
+    final entry = TransactionsCompanion.insert(
+      amount: double.parse(_amountController.text),
       date: _selectedDate,
-      note: _noteController.text.isEmpty ? null : _noteController.text,
-      fromAccount: _selectedPaymentMethod,
+      category: _selectedCategory!,
+      type: TransactionType.expense,
+      note: drift.Value(
+        _noteController.text.isEmpty ? null : _noteController.text,
+      ),
+      fromAccount: drift.Value(_selectedPaymentMethod),
     );
 
     try {
-      await _transactionService.addTransaction(transaction);
+      await _transactionService.insertTransaction(entry);
       if (mounted) {
         ScaffoldMessenger.of(
           context,

@@ -1,178 +1,145 @@
-import 'package:account_book/models/transaction.dart';
-import 'package:flutter/foundation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+// services/transaction_service.dart
+
+import 'package:account_book/data/app_database.dart';
+import 'package:account_book/di/locators.dart';
+import 'package:drift/drift.dart';
 
 class TransactionService {
-  /// 交易服务单例
-  static final TransactionService _instance = TransactionService._internal();
+  /// 数据库实例
+  final _db = getIt<AppDatabase>();
 
-  /// 工厂函数获取单例
-  factory TransactionService() => _instance;
-
-  /// 私有构造函数
-  TransactionService._internal();
-
-  /// 交易 Box
-  late Box<Transaction> _box;
-
-  /// Hive Box 名称
-  static const String _boxName = 'transactions_box';
-
-  /// 初始化服务，打开 Hive Box
-  Future<void> init() async {
-    if (!Hive.isBoxOpen(_boxName)) {
-      _box = await Hive.openBox<Transaction>(_boxName);
-    } else {
-      _box = Hive.box<Transaction>(_boxName);
-    }
+  /// 这样定义，UI层调用时最舒服
+  Future<void> add({
+    required double amount,
+    required DateTime date,
+    required String category,
+    required TransactionType type,
+    String? note,
+  }) async {
+    await _db
+        .into(_db.transactions)
+        .insert(
+          TransactionsCompanion.insert(
+            amount: amount,
+            date: date,
+            category: category,
+            type: type,
+            note: Value(note), // 自动处理 String? 到 Value<String?> 的转换
+          ),
+        );
   }
 
-  /// 获取交易 Box
-  Box<Transaction> get box => _box;
-
-  /// 添加交易记录
-  /// 如果 id 已存在，会覆盖原有记录
-  Future<void> addTransaction(Transaction transaction) async {
-    await _box.put(transaction.id, transaction);
+  // 插入数据
+  Future<int> insertTransaction(TransactionsCompanion entry) async {
+    // 直接插入即可，Drift 会自动处理里面的 Value
+    return await _db.into(_db.transactions).insert(entry);
   }
 
-  /// 获取单个交易记录
-  Transaction? getTransaction(String id) {
-    return _box.get(id);
+  /// 删除数据
+  Future<void> deleteTransaction(int id) async {
+    await (_db.delete(_db.transactions)..where((t) => t.id.equals(id))).go();
   }
 
-  /// 获取所有交易记录
-  List<Transaction> getAllTransactions() {
-    return _box.values.toList();
+  /// 更新数据
+  Future<void> updateTransaction(Transaction original, double newAmount) async {
+    await (_db.update(_db.transactions)..where((t) => t.id.equals(original.id)))
+        .write(TransactionsCompanion(amount: Value(newAmount)));
   }
 
-  /// 更新交易记录
-  Future<void> updateTransaction(Transaction transaction) async {
-    await _box.put(transaction.id, transaction);
+  // 获取收入流
+  Stream<double> getIncomeStream({DateTime? date}) {
+    return _db.watchTotalAmount(type: TransactionType.income, date: date);
   }
 
-  /// 删除交易记录
-  Future<void> deleteTransaction(String id) async {
-    await _box.delete(id);
+  // 获取支出流
+  Stream<double> getExpenseStream({DateTime? date}) {
+    return _db.watchTotalAmount(type: TransactionType.expense, date: date);
   }
 
-  /// 清空所有交易记录
-  Future<void> clearAll() async {
-    await _box.clear();
+  // 获取结余流 (组合两个流)
+  Stream<double> getBalanceStream({DateTime? date}) {
+    final income = getIncomeStream(date: date);
+    final expense = getExpenseStream(date: date);
+
+    // 使用 rxdart 的 combineLatest 会更优雅，这里用基础 Stream 实现
+    // 简单起见，在 UI 层做减法，或者在这里通过 StreamZip 实现
+    return income.asyncMap((inc) async {
+      final exp = await getExpenseStream(date: date).first;
+      return inc - exp;
+    });
   }
 
-  /// 按类型获取交易
-  List<Transaction> getTransactionsByType(TransactionType type) {
-    return _box.values.where((t) => t.type == type).toList();
+  // 1. 获取本月总额的流 (SQL 计算版)
+  Stream<double> watchTotal(TransactionType type, DateTime month) {
+    final query = _db.selectOnly(_db.transactions);
+
+    // 相当于 SQL: SELECT SUM(amount) FROM transactions WHERE ...
+    query.addColumns([_db.transactions.amount.sum()]);
+    query.where(_db.transactions.type.equals(type.index));
+    query.where(_db.transactions.date.year.equals(month.year));
+    query.where(_db.transactions.date.month.equals(month.month));
+
+    return query.watchSingle().map(
+      (row) => row.read(_db.transactions.amount.sum()) ?? 0.0,
+    );
   }
 
-  /// 按分类获取交易
-  List<Transaction> getTransactionsByCategory(String category) {
-    return _box.values.where((t) => t.category == category).toList();
+  // 获取所有交易并按时间倒序排列
+  Stream<List<Transaction>> watchAll() {
+    return (_db.select(
+      _db.transactions,
+    )..orderBy([(t) => OrderingTerm.desc(t.date)])).watch();
   }
 
-  /// 按日期范围获取交易
-  List<Transaction> getTransactionsByDateRange(DateTime start, DateTime end) {
-    return _box.values
-        .where((t) => t.date.isAfter(start) && t.date.isBefore(end))
-        .toList();
+  // 获取所有交易的实时流
+  Stream<List<Transaction>> watchAllTransactions() {
+    final database = getIt<AppDatabase>();
+    return database.select(database.transactions).watch();
   }
 
-  /// [排序获取] 获取按时间倒序排列的所有记录（最新的在最前面）
-  List<Transaction> getAllTransactionsSorted() {
-    final list = _box.values.toList();
-    list.sort((a, b) => b.date.compareTo(a.date));
-    return list;
+  // 条件查询：获取本月的收入
+  Stream<List<Transaction>> watchMonthlyIncome(DateTime month) {
+    final database = getIt<AppDatabase>();
+    return (database.select(database.transactions)
+          ..where((t) => t.type.equals(TransactionType.income.index))
+          ..where((t) => t.date.year.equals(month.year))
+          ..where((t) => t.date.month.equals(month.month)))
+        .watch();
   }
 
-  /// [按月筛选] 获取特定月份的记录 (例如: 2024-05)
-  List<Transaction> getTransactionsByMonth(DateTime month) {
-    return _box.values.where((t) {
-      return t.date.year == month.year && t.date.month == month.month;
-    }).toList()..sort((a, b) => b.date.compareTo(a.date));
+  // 获取最近的交易记录（按日期降序，取前10条）
+  Stream<List<Transaction>> watchRecentTransactions({int limit = 10}) {
+    return (_db.select(_db.transactions)
+          ..orderBy([(t) => OrderingTerm.desc(t.date)]) // 按日期降序
+          ..limit(limit)) // 限制数量
+        .watch();
   }
 
-  /// 获取总收入 (可选按月/年过滤)
-  double getTotalIncome({DateTime? date}) {
-    return _box.values
-        .where((t) => t.type == TransactionType.income)
-        .where((t) => _isSamePeriod(t.date, date)) // 这里的过滤逻辑是关键
-        .fold(0.0, (sum, t) => sum + t.amount);
-  }
+  // 在 Service 里定义
+  // Stream<DashboardData> watchSummary(DateTime month) {
+  //   return Rx.combineLatest2(
+  //     watchTotal(TransactionType.income, month),
+  //     watchTotal(TransactionType.expense, month),
+  //     (inc, exp) => DashboardData(income: inc, expense: exp),
+  //   );
+  // }
 
-  /// 获取总支出 (可选按月/年过滤)
-  double getTotalExpense({DateTime? date}) {
-    return _box.values
-        .where((t) => t.type == TransactionType.expense)
-        .where((t) => _isSamePeriod(t.date, date))
-        .fold(0.0, (sum, t) => sum + t.amount);
-  }
+  /// 获取所有数据并以 JSON 格式打印到控制台
+  Future<void> debugPrintAllAsJson() async {
+    // 1. 从数据库获取所有原始数据对象
+    final allTransactions = await _db.select(_db.transactions).get();
 
-  /// 获取结余
-  double getSurplus({DateTime? date}) {
-    return getTotalIncome(date: date) - getTotalExpense(date: date);
-  }
+    print('--- 📂 数据库 JSON 导出开始 (共 ${allTransactions.length} 条) ---');
 
-  /// 私有辅助工具：判断日期是否属于同一周期
-  /// 如果 target 为 null，则返回 true (不过滤)
-  /// 如果你想支持“月度统计”，这里对比 year 和 month
-  bool _isSamePeriod(DateTime transactionDate, DateTime? target) {
-    if (target == null) return true;
-    return transactionDate.year == target.year &&
-        transactionDate.month == target.month;
-  }
+    // 2. 使用 for 循环遍历并打印
+    for (final t in allTransactions) {
+      // Drift 自动生成的类拥有 toJson() 方法，返回一个 Map
+      final Map<String, dynamic> jsonMap = t.toJson();
 
-  /// [分类排行] 获取指定类型的分类汇总统计 (常用于饼图)
-  /// 返回 Map，例如: {"餐饮": 150.0, "交通": 50.0}
-  Map<String, double> getCategoryStats(TransactionType type) {
-    Map<String, double> stats = {};
-    for (var t in _box.values.where((t) => t.type == type)) {
-      stats[t.category] = (stats[t.category] ?? 0) + t.amount;
-    }
-    return stats;
-  }
-
-  /// [响应式监听] 提供一个 ValueListenable，让 UI 随数据库自动刷新
-  /// 使用方式: ValueListenableBuilder(valueListenable: txService.listenable(), ...)
-  ValueListenable<Box<Transaction>> listenable() {
-    return _box.listenable();
-  }
-
-  /// [调试工具] 逐条打印 JSON，防止控制台截断
-  void debugExportAsJson() {
-    final transactions = _box.values.toList();
-
-    print("--- 数据库 JSON 导出开始 (共 ${transactions.length} 条) ---");
-    print("["); // 打印数组开始符号
-
-    for (int i = 0; i < transactions.length; i++) {
-      final t = transactions[i];
-
-      // 构建单条数据的 Map
-      final map = {
-        'id': t.id,
-        'amount': t.amount,
-        'date': t.date.toIso8601String(),
-        'category': t.category,
-        'type': t.type.toString().split('.').last, // 只取枚举值，去掉前缀
-        'fromAccount': t.fromAccount,
-        'toAccount': t.toAccount,
-        'note': t.note,
-      };
-
-      // 转换为格式化的字符串
-      // 如果你不需要美化，直接用 map.toString()
-      String line = "  ${map.toString()}";
-
-      // 如果不是最后一条，加上逗号
-      if (i < transactions.length - 1) {
-        line += ",";
-      }
-
-      print(line); // 每一笔交易占用一行，避免触发长度限制
+      // 或者直接打印生成的 JSON 字符串
+      print(t.toJsonString());
     }
 
-    print("]"); // 打印数组结束符号
-    print("--- 数据库 JSON 导出结束 ---");
+    print('--- 📂 数据库 JSON 导出结束 ---');
   }
 }

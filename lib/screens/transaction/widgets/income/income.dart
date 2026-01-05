@@ -1,7 +1,8 @@
+import 'package:account_book/data/app_database.dart';
 import 'package:account_book/di/locators.dart';
-import 'package:account_book/models/transaction.dart';
 import 'package:account_book/screens/transaction/widgets/expense/widgets/custom_dropdown_menu.dart';
 import 'package:account_book/services/transaction_service.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -43,15 +44,9 @@ class _IncomeState extends State<Income> {
     {'icon': Icons.more_horiz, 'name': '其他'},
   ];
 
-  Future<void> _initTransactionService() async {
-    await _transactionService.init();
-  }
-
   @override
   void initState() {
     super.initState();
-    // 确保服务已初始化（虽然 main.dart 中通常已经打开了 box）
-    _initTransactionService();
   }
 
   @override
@@ -93,16 +88,19 @@ class _IncomeState extends State<Income> {
       }
     }
 
-    final transaction = Transaction.income(
-      amount: amount,
-      category: _selectedCategory!,
+    final entry = TransactionsCompanion.insert(
+      amount: double.parse(_amountController.text),
       date: _selectedDate,
-      note: _noteController.text.isEmpty ? null : _noteController.text,
-      toAccount: _selectedPaymentMethod,
+      category: _selectedCategory!,
+      type: TransactionType.income,
+      note: drift.Value(
+        _noteController.text.isEmpty ? null : _noteController.text,
+      ),
+      toAccount: drift.Value(_selectedPaymentMethod),
     );
 
     try {
-      await _transactionService.addTransaction(transaction);
+      await _transactionService.insertTransaction(entry);
       if (mounted) {
         ScaffoldMessenger.of(
           context,

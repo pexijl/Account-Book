@@ -1,7 +1,8 @@
+import 'package:account_book/data/app_database.dart';
 import 'package:account_book/di/locators.dart';
-import 'package:account_book/models/transaction.dart';
 import 'package:account_book/screens/transaction/widgets/expense/widgets/custom_dropdown_menu.dart';
 import 'package:account_book/services/transaction_service.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -43,14 +44,9 @@ class _TransferState extends State<Transfer> {
 
   String? _selectedCategory;
 
-  Future<void> _initTransactionService() async {
-    await _transactionService.init();
-  }
-
   @override
   void initState() {
     super.initState();
-    _initTransactionService();
     // 设置默认值
     _selectedFromAccount = '银行卡';
     _selectedToAccount = '现金';
@@ -110,20 +106,22 @@ class _TransferState extends State<Transfer> {
       }
     }
 
-    // 创建转账记录
-    final transaction = Transaction.transfer(
-      amount: amount,
-      category: _selectedCategory!,
+    final entry = TransactionsCompanion.insert(
+      amount: double.parse(_amountController.text),
       date: _selectedDate,
-      note: _noteController.text.isEmpty
-          ? '从 $_selectedFromAccount 转到 $_selectedToAccount'
-          : _noteController.text,
-      fromAccount: _selectedFromAccount,
-      toAccount: _selectedToAccount,
+      category: _selectedCategory!,
+      type: TransactionType.transfer,
+      note: drift.Value(
+        _noteController.text.isEmpty
+            ? '从 $_selectedFromAccount 转到 $_selectedToAccount'
+            : _noteController.text,
+      ),
+      fromAccount: drift.Value(_selectedFromAccount),
+      toAccount: drift.Value(_selectedToAccount),
     );
 
     try {
-      await _transactionService.addTransaction(transaction);
+      await _transactionService.insertTransaction(entry);
       if (mounted) {
         ScaffoldMessenger.of(
           context,

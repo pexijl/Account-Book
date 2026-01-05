@@ -1,8 +1,7 @@
+import 'package:account_book/data/app_database.dart';
 import 'package:account_book/di/locators.dart';
 import 'package:account_book/services/transaction_service.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:account_book/models/transaction.dart';
 
 class RecentTransactions extends StatefulWidget {
   const RecentTransactions({super.key});
@@ -26,24 +25,7 @@ class _RecentTransactionsState extends State<RecentTransactions> {
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
       child: Column(
         children: [
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '最近交易',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                TextButton(
-                  onPressed: () {
-                    _transactionService.debugExportAsJson();
-                  },
-                  child: Text('查看全部'),
-                ),
-              ],
-            ),
-          ),
+          _buildHeader(),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -58,27 +40,36 @@ class _RecentTransactionsState extends State<RecentTransactions> {
                   ),
                 ],
               ),
-              child: ValueListenableBuilder<Box<Transaction>>(
-                valueListenable: _transactionService.listenable(),
-                builder: (context, box, _) {
-                  final transactions = box.values.toList();
-                  // 按日期降序排序
-                  transactions.sort((a, b) => b.date.compareTo(a.date));
+              child: StreamBuilder<List<Transaction>>(
+                stream: _transactionService.watchRecentTransactions(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final transactions = snapshot.data ?? [];
+
                   if (transactions.isEmpty) {
                     return const Center(child: Text('暂无交易记录'));
                   }
+
                   return ListView.builder(
-                    itemCount: transactions.length > 10
-                        ? 10
-                        : transactions.length,
+                    padding: EdgeInsets.zero,
+                    itemCount: transactions.length,
                     itemBuilder: (context, index) {
                       final transaction = transactions[index];
+
+                      // 注意：Drift 生成的 Transaction 对象字段名
+                      // 与你在 tables.dart 中定义的一致
                       return ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: transaction.type.backgroundColor,
+                          // 这里假设你在 TransactionType 枚举里定义了扩展方法处理颜色和图标
+                          backgroundColor: _getBackgroundColor(
+                            transaction.type,
+                          ),
                           child: Icon(
-                            transaction.type.icon,
-                            color: transaction.type.color,
+                            _getIcon(transaction.type),
+                            color: _getColor(transaction.type),
                           ),
                         ),
                         title: Text(transaction.category),
@@ -86,13 +77,9 @@ class _RecentTransactionsState extends State<RecentTransactions> {
                           transaction.date.toString().split(' ')[0],
                         ),
                         trailing: Text(
-                          '${transaction.type == TransactionType.expense
-                              ? '-'
-                              : transaction.type == TransactionType.income
-                              ? '+'
-                              : '⇆'}¥${transaction.amount.toStringAsFixed(2)}',
+                          '${_getSymbol(transaction.type)}¥${transaction.amount.toStringAsFixed(2)}',
                           style: TextStyle(
-                            color: transaction.type.color,
+                            color: _getColor(transaction.type),
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -103,6 +90,46 @@ class _RecentTransactionsState extends State<RecentTransactions> {
                 },
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getSymbol(TransactionType type) {
+    switch (type) {
+      case TransactionType.expense:
+        return '-';
+      case TransactionType.income:
+        return '+';
+      case TransactionType.transfer:
+        return '⇆';
+    }
+  }
+
+  Color _getColor(TransactionType type) =>
+      type == TransactionType.income ? Colors.green : Colors.red;
+  IconData _getIcon(TransactionType type) =>
+      type == TransactionType.income ? Icons.add : Icons.remove;
+  Color _getBackgroundColor(TransactionType type) =>
+      _getColor(type).withValues(alpha: 0.1);
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            '最近交易',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          TextButton(
+            onPressed: () {
+              // TODO: 跳转全部页面
+              _transactionService.debugPrintAllAsJson();
+            },
+            child: const Text('查看全部'),
           ),
         ],
       ),

@@ -1,3 +1,4 @@
+import 'package:account_book/data/app_database.dart';
 import 'package:account_book/di/locators.dart';
 import 'package:account_book/services/transaction_service.dart';
 import 'package:flutter/material.dart';
@@ -15,53 +16,61 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     // 1. 监听 TransactionService 提供的 Box 监听器
-    return ValueListenableBuilder(
-      valueListenable: _transactionService.listenable(),
-      builder: (context, box, _) {
-        // 2. 每次数据库变化，这里都会重新计算最新数值
-        final surplus = _transactionService.getSurplus(date: _currentMonth);
-        final income = _transactionService.getTotalIncome(date: _currentMonth);
-        final expense = _transactionService.getTotalExpense(
-          date: _currentMonth,
-        );
-        return Container(
-          margin: const EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: 8,
+    return StreamBuilder<double>(
+      stream: _transactionService.watchTotal(
+        TransactionType.income,
+        _currentMonth,
+      ),
+      builder: (context, incomeSnapshot) {
+        // 监听支出流
+        return StreamBuilder<double>(
+          stream: _transactionService.watchTotal(
+            TransactionType.expense,
+            _currentMonth,
           ),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.purple[400]!, Colors.indigo[400]!],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Center(
-            child: Column(
-              children: [
-                _SurplusSection(surplus: surplus),
-                Expanded(
-                  flex: 60,
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 8, right: 8),
-                    child: Row(
-                      children: [
-                        _StatCard(title: '收入', isIncome: true, amount: income),
-                        _StatCard(
-                          title: '支出',
-                          isIncome: false,
-                          amount: expense,
-                        ),
-                      ],
+          builder: (context, expenseSnapshot) {
+            // 获取数据，如果还没数据则默认为 0
+            final income = incomeSnapshot.data ?? 0.0;
+            final expense = expenseSnapshot.data ?? 0.0;
+            final surplus = income - expense;
+
+            return Container(
+              margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.purple[400]!, Colors.indigo[400]!],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  _SurplusSection(surplus: surplus),
+                  Expanded(
+                    flex: 60,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(
+                        children: [
+                          _StatCard(
+                            title: '收入',
+                            isIncome: true,
+                            amount: income,
+                          ),
+                          _StatCard(
+                            title: '支出',
+                            isIncome: false,
+                            amount: expense,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          },
         );
       },
     );

@@ -1,22 +1,13 @@
+import 'package:account_book/data/app_database.dart';
 import 'package:account_book/services/transaction_service.dart';
 import 'package:get_it/get_it.dart' show GetIt;
 
 final getIt = GetIt.instance;
 
 Future<void> setupLocators() async {
-  // 注册为单例 (Singleton)
-  // getIt.registerSingleton<AppSettingService>(AppSettingService());
-  // await getIt<AppSettingService>().init();
+  // 1. 先注册数据库（因为 Service 依赖它）
+  getIt.registerSingleton<AppDatabase>(AppDatabase());
 
-  // getIt.registerSingleton<CategoryService>(CategoryService());
-  // await getIt<CategoryService>().init();
-
-  // 注册 TransactionService 为单例
-  final transactionService = TransactionService();
-
-  // 核心步骤：在此处初始化 Service 内部的 Box
-  await transactionService.init();
-
-  // 将初始化完成的服务交给 GetIt 管理
-  getIt.registerSingleton<TransactionService>(transactionService);
+  // 2. 必须手动注册你的 Service！
+  getIt.registerLazySingleton<TransactionService>(() => TransactionService());
 }
