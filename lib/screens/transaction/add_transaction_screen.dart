@@ -39,6 +39,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen>
           ),
         ],
       ),
+      // TODO: 移除TabBarView页面，改为头部是一个表单设置交易类型，点击切换
       body: TabBarView(controller: _tabController, children: _tabPages),
     );
   }

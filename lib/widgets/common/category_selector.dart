@@ -33,6 +33,7 @@ class CategorySelector extends StatelessWidget {
               title,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
+            // TODO: 添加新增分类功能
           ),
           Container(
             child: GridView.builder(
