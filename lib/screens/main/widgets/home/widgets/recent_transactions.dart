@@ -30,7 +30,7 @@ class _RecentTransactionsState extends State<RecentTransactions> {
           _buildHeader(),
           Expanded(
             child: StreamBuilder<List<Transaction>>(
-              stream: _transactionService.watchRecentTransactions(100),
+              stream: _transactionService.watchRecentTransactions(10),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -43,6 +43,8 @@ class _RecentTransactionsState extends State<RecentTransactions> {
                 }
 
                 return ListView.builder(
+                  controller: PrimaryScrollController.of(context),
+                  physics: const BouncingScrollPhysics(),
                   padding: EdgeInsets.zero,
                   itemCount: transactions.length,
                   itemBuilder: (context, index) {
