@@ -22,6 +22,7 @@ class _RecentTransactionsState extends State<RecentTransactions> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 450,
       margin: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 16),
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
       child: Column(

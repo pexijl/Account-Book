@@ -15,6 +15,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 200,
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(

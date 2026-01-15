@@ -55,11 +55,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: Center(
+        child: SingleChildScrollView(
           child: Column(
             children: [
-              Expanded(flex: 4, child: Dashboard()),
-              Expanded(flex: 9, child: RecentTransactions()),
+              const Dashboard(),
+              const RecentTransactions(),
             ],
           ),
         ),
