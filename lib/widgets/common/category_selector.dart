@@ -7,19 +7,32 @@ class CategoryItem {
   CategoryItem({required this.icon, required this.name});
 }
 
+// TODO: 添加自定义校验
 class CategorySelector extends StatelessWidget {
-  final List<CategoryItem> categories;
+  final TextEditingController controller;
   final String? selectedCategory;
   final Function(String) onCategorySelected;
   final String title;
 
-  const CategorySelector({
+  CategorySelector({
     super.key,
-    required this.categories,
+    required this.controller,
     required this.selectedCategory,
     required this.onCategorySelected,
     this.title = '分类',
   });
+
+  // TODO: 从sqllite 中获取分类列表
+  final List<CategoryItem> categories = [
+    CategoryItem(icon: Icons.restaurant, name: '餐饮'),
+    CategoryItem(icon: Icons.directions_bus, name: '交通'),
+    CategoryItem(icon: Icons.shopping_bag, name: '购物'),
+    CategoryItem(icon: Icons.movie, name: '娱乐'),
+    CategoryItem(icon: Icons.medical_services, name: '医疗'),
+    CategoryItem(icon: Icons.school, name: '教育'),
+    CategoryItem(icon: Icons.home, name: '居家'),
+    CategoryItem(icon: Icons.more_horiz, name: '其他'),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +41,7 @@ class CategorySelector extends StatelessWidget {
         children: [
           Container(
             alignment: Alignment.centerLeft,
-            margin: const EdgeInsets.only(bottom: 20),
+            margin: const EdgeInsets.only(bottom: 16),
             child: Text(
               title,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

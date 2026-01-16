@@ -1,7 +1,7 @@
 import 'package:account_book/database/app_database.dart';
 import 'package:account_book/di/locators.dart';
 import 'package:account_book/models/enums.dart';
-import 'package:account_book/models/queries/transaction_query.dart';
+import 'package:account_book/models/query/transaction_query.dart';
 import 'package:drift/drift.dart';
 
 // repositories/transaction_repository.dart

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 class PaymentMethodSelector extends StatefulWidget {
   final String? initialSelection;
-  final List<PaymentMethodOption<String>> paymentMethods;
   final ValueChanged<String?>? onSelected;
   final String labelText;
   final IconData icon;
@@ -10,7 +9,6 @@ class PaymentMethodSelector extends StatefulWidget {
   const PaymentMethodSelector({
     super.key,
     this.initialSelection,
-    required this.paymentMethods,
     this.onSelected,
     this.labelText = '支付方式',
     this.icon = Icons.payment,
@@ -23,6 +21,15 @@ class PaymentMethodSelector extends StatefulWidget {
 class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
   String? _selectedPaymentMethod;
   late TextEditingController _controller;
+
+  // TODO: 从sqllite 中获取支付方式列表
+  final List<PaymentMethodOption<String>> paymentMethods = [
+    PaymentMethodOption(value: '现金', label: '现金'),
+    PaymentMethodOption(value: '银行卡', label: '银行卡'),
+    PaymentMethodOption(value: '支付宝', label: '支付宝'),
+    PaymentMethodOption(value: '微信', label: '微信'),
+    PaymentMethodOption(value: '其他', label: '其他'),
+  ];
 
   @override
   void initState() {
@@ -68,9 +75,9 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
               },
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: widget.paymentMethods.length,
+                itemCount: paymentMethods.length,
                 itemBuilder: (context, index) {
-                  final method = widget.paymentMethods[index];
+                  final method = paymentMethods[index];
                   final isSelected = _selectedPaymentMethod == method.value;
 
                   return RadioListTile<String>(
@@ -117,7 +124,7 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         readOnly: true,
         onTap: _showPaymentMethodDialog,
@@ -129,6 +136,12 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
           suffixIcon: const Icon(Icons.arrow_drop_down),
           hintText: '请选择${widget.labelText}',
         ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return '请选择${widget.labelText}';
+          }
+          return null;
+        },
       ),
     );
   }

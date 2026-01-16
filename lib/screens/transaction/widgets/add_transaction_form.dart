@@ -1,5 +1,6 @@
 import 'package:account_book/di/locators.dart';
 import 'package:account_book/models/enums.dart';
+import 'package:account_book/models/form/transaction_form.dart';
 import 'package:account_book/widgets/common/amount_input.dart';
 import 'package:account_book/services/transaction_service.dart';
 import 'package:account_book/widgets/common/category_selector.dart';
@@ -10,95 +11,93 @@ import 'package:account_book/widgets/common/save_button.dart';
 import 'package:flutter/material.dart';
 
 class AddTransactionForm extends StatefulWidget {
-  const AddTransactionForm({super.key});
+  final GlobalKey<FormState> formKey;
+  final TransactionForm transactionForm;
+  const AddTransactionForm({
+    super.key,
+    required this.formKey,
+    required this.transactionForm,
+  });
 
   @override
   State<AddTransactionForm> createState() => _AddTransactionFormState();
 }
 
 class _AddTransactionFormState extends State<AddTransactionForm> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _amountController = TextEditingController();
-  final TextEditingController _noteController = TextEditingController();
-
-  String? _selectedCategory;
-  String? _selectedPaymentMethod = '现金';
-  DateTime _selectedDate = DateTime.now();
-  final _transactionService = getIt<TransactionService>();
-
-  // 支付方式列表
-  final List<PaymentMethodOption<String>> _paymentMethods = [
-    PaymentMethodOption(value: '现金', label: '现金'),
-    PaymentMethodOption(value: '银行卡', label: '银行卡'),
-    PaymentMethodOption(value: '支付宝', label: '支付宝'),
-    PaymentMethodOption(value: '微信', label: '微信'),
-    PaymentMethodOption(value: '其他', label: '其他'),
-  ];
-
-  // 临时分类列表 - 使用新的 CategoryItem 类型
-  final List<CategoryItem> _categories = [
-    CategoryItem(icon: Icons.restaurant, name: '餐饮'),
-    CategoryItem(icon: Icons.directions_bus, name: '交通'),
-    CategoryItem(icon: Icons.shopping_bag, name: '购物'),
-    CategoryItem(icon: Icons.movie, name: '娱乐'),
-    CategoryItem(icon: Icons.medical_services, name: '医疗'),
-    CategoryItem(icon: Icons.school, name: '教育'),
-    CategoryItem(icon: Icons.home, name: '居家'),
-    CategoryItem(icon: Icons.more_horiz, name: '其他'),
-  ];
+  late TextEditingController _amountController;
+  late TextEditingController _categoryController;
+  late TextEditingController _noteController;
 
   @override
   void initState() {
     super.initState();
+
+    // --- 初始化控制器：将对象的值赋给控制器 ---
+    _amountController = TextEditingController(
+      text: widget.transactionForm.amount == 0.0
+          ? ''
+          : widget.transactionForm.amount.toString(),
+    );
+    _categoryController = TextEditingController(
+      text: widget.transactionForm.category,
+    );
+    _noteController = TextEditingController(
+      text: widget.transactionForm.note ?? '',
+    );
+
+    // --- 监听控制器变化：将输入框的值写回对象 ---
+    _amountController.addListener(_updateAmount);
+    // _categoryController.addListener(_updateCategory);
+    // _noteController.addListener(_updateNote);
   }
 
   @override
   void dispose() {
+    // 记得释放控制器，防止内存泄漏
     _amountController.dispose();
+    _categoryController.dispose();
     _noteController.dispose();
     super.dispose();
   }
 
-  Future<void> _saveExpense() async {
-    final amount = double.tryParse(_amountController.text);
-    if (amount == null || amount <= 0) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('请输入有效的金额')));
-      return;
+  void _updateAmount() {
+    final value = double.tryParse(_amountController.text);
+    if (value != null) {
+      setState(() {
+        widget.transactionForm.amount = value;
+      });
     }
+  }
 
-    if (_formKey.currentState!.validate()) {
-      if (_selectedCategory == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('请选择分类')));
-        return;
-      }
-    }
+  void _updateDate(DateTime newDate) {
+    setState(() {
+      widget.transactionForm.date = newDate;
+    });
+  }
 
-    try {
-      await _transactionService.addTransaction(
-        amount: amount,
-        date: _selectedDate,
-        category: _selectedCategory!,
-        type: TransactionType.expense,
-        fromAccount: _selectedPaymentMethod,
-        note: _noteController.text,
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('支出已保存')));
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
-      }
-    }
+  void _updateCategory() {
+    final newCategory = _categoryController.text;
+    setState(() {
+      widget.transactionForm.category = newCategory;
+    });
+  }
+
+  void _updatefromAccount(String newAccount) {
+    setState(() {
+      widget.transactionForm.fromAccount = newAccount;
+    });
+  }
+
+  void _updateToAccount(String newAccount) {
+    setState(() {
+      widget.transactionForm.toAccount = newAccount;
+    });
+  }
+
+  void _updateNote() {
+    setState(() {
+      widget.transactionForm.note = _noteController.text;
+    });
   }
 
   @override
@@ -106,54 +105,44 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
     return SingleChildScrollView(
       padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
       child: Form(
-        key: _formKey,
+        key: widget.formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // 金额输入
-            AmountInput(
-              controller: _amountController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入金额';
-                }
-                return null;
-              },
-            ),
+            AmountInput(controller: _amountController),
             // 日期选择
             DatePickerInput(
-              initialDate: _selectedDate,
+              initialDate: widget.transactionForm.date,
               onDateChanged: (DateTime newDate) {
                 setState(() {
-                  _selectedDate = newDate;
+                  widget.transactionForm.date = newDate;
                 });
               },
             ),
             // 支付方式选择
             PaymentMethodSelector(
-              initialSelection: _selectedPaymentMethod,
-              paymentMethods: _paymentMethods,
+              initialSelection: widget.transactionForm.fromAccount,
               onSelected: (String? value) {
                 setState(() {
-                  _selectedPaymentMethod = value;
+                  widget.transactionForm.fromAccount = value;
                 });
               },
               labelText: '支付方式',
             ),
             // 分类选择
             CategorySelector(
-              categories: _categories,
-              selectedCategory: _selectedCategory,
+              controller: _categoryController,
+              selectedCategory: widget.transactionForm.category,
               onCategorySelected: (String categoryName) {
                 setState(() {
-                  _selectedCategory = categoryName;
+                  widget.transactionForm.category = categoryName;
                 });
               },
             ),
             // 备注输入
             NoteInput(controller: _noteController),
             // 保存按钮
-            SaveButton(onPressed: _saveExpense, text: '保存支出'),
           ],
         ),
       ),

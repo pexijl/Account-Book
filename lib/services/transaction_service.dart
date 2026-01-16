@@ -3,6 +3,7 @@
 import 'package:account_book/database/app_database.dart';
 import 'package:account_book/di/locators.dart';
 import 'package:account_book/models/enums.dart';
+import 'package:account_book/models/form/transaction_form.dart';
 import 'package:account_book/repositories/transaction_repository.dart';
 import 'package:drift/drift.dart';
 
@@ -30,6 +31,22 @@ class TransactionService {
         fromAccount: Value(fromAccount),
         toAccount: Value(toAccount),
         note: Value(note),
+      ),
+    );
+  }
+
+  /// 添加交易记录 by TransactionForm
+  Future<int> addTransactionByForm({required TransactionForm form}) async {
+    // TODO: 增加业务校验 (Validation)
+    return await _repo.insert(
+      TransactionsCompanion.insert(
+        amount: form.amount!,
+        date: form.date,
+        category: form.category,
+        type: form.type,
+        fromAccount: Value(form.fromAccount),
+        toAccount: Value(form.toAccount),
+        note: Value(form.note),
       ),
     );
   }

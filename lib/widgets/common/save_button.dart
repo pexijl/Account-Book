@@ -1,36 +1,35 @@
 import 'package:flutter/material.dart';
 
 class SaveButton extends StatelessWidget {
-  final VoidCallback onPressed;
   final String text;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-  final double borderRadius;
-  final EdgeInsets padding;
+  final VoidCallback onPressed;
 
-  const SaveButton({
-    super.key,
-    required this.onPressed,
-    this.text = '保存',
-    this.backgroundColor,
-    this.foregroundColor,
-    this.borderRadius = 8.0,
-    this.padding = const EdgeInsets.symmetric(vertical: 16),
-  });
+  const SaveButton({super.key, this.text = '保存', required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        padding: padding,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadius),
-        ),
-        backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
-        foregroundColor: foregroundColor ?? Colors.white,
+    return Container(
+      margin: const EdgeInsets.only(
+        top: 0.0,
+        left: 16.0,
+        right: 16.0,
+        bottom: 0,
       ),
-      child: Text(text, style: const TextStyle(fontSize: 18)),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          backgroundColor: Theme.of(context).primaryColor,
+          foregroundColor: Colors.white,
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ),
     );
   }
 }
