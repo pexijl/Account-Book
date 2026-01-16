@@ -39,6 +39,7 @@ class RecentTransactionItem extends StatelessWidget {
           ),
         ],
       ),
+      margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
           // 这里假设你在 TransactionType 枚举里定义了扩展方法处理颜色和图标
