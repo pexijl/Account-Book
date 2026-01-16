@@ -9,14 +9,14 @@ import 'package:account_book/widgets/common/payment_method_selector.dart';
 import 'package:account_book/widgets/common/save_button.dart';
 import 'package:flutter/material.dart';
 
-class Expense extends StatefulWidget {
-  const Expense({super.key});
+class AddTransactionForm extends StatefulWidget {
+  const AddTransactionForm({super.key});
 
   @override
-  State<Expense> createState() => _ExpenseState();
+  State<AddTransactionForm> createState() => _AddTransactionFormState();
 }
 
-class _ExpenseState extends State<Expense> {
+class _AddTransactionFormState extends State<AddTransactionForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
@@ -104,7 +104,7 @@ class _ExpenseState extends State<Expense> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
       child: Form(
         key: _formKey,
         child: Column(

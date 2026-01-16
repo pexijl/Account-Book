@@ -21,7 +21,7 @@ class _RoutesState extends State<Routes> {
     return MaterialApp(
       title: 'Account Book',
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: '/', // TODO: 重置回 '/'
+      initialRoute: '/addTransaction', // TODO: 重置回 '/'
       routes: routes,
       // --- 在这里添加全局修复逻辑 ---
       builder: (BuildContext context, Widget? child) {

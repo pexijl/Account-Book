@@ -1,6 +1,6 @@
-import 'package:account_book/screens/transaction/widgets/expense/expense.dart';
-import 'package:account_book/screens/transaction/widgets/income/income.dart';
-import 'package:account_book/screens/transaction/widgets/transfer/transfer.dart';
+import 'package:account_book/models/enums.dart';
+import 'package:account_book/screens/transaction/widgets/add_transaction_form.dart';
+import 'package:account_book/screens/transaction/widgets/transaction_type_selector.dart';
 import 'package:flutter/material.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -10,27 +10,32 @@ class AddTransactionScreen extends StatefulWidget {
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
 }
 
-class _AddTransactionScreenState extends State<AddTransactionScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController = TabController(
-    length: 3,
-    vsync: this,
-  );
+class _AddTransactionScreenState extends State<AddTransactionScreen> {
+  TransactionType _selectedType = TransactionType.expense;
 
-  final _tabs = [
-    Tab(icon: Icon(Icons.arrow_downward), text: '支出'),
-    Tab(icon: Icon(Icons.arrow_upward), text: '收入'),
-    Tab(icon: Icon(Icons.compare_arrows), text: '转账'),
+  final _segments = [
+    ButtonSegment<TransactionType>(
+      value: TransactionType.expense,
+      label: const Text('支出'),
+      icon: const Icon(Icons.arrow_downward),
+    ),
+    ButtonSegment<TransactionType>(
+      value: TransactionType.income,
+      label: const Text('收入'),
+      icon: const Icon(Icons.arrow_upward),
+    ),
+    ButtonSegment<TransactionType>(
+      value: TransactionType.transfer,
+      label: const Text('转账'),
+      icon: const Icon(Icons.compare_arrows),
+    ),
   ];
-
-  final _tabPages = [const Expense(), const Income(), const Transfer()];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('添加账单'),
-        bottom: TabBar(controller: _tabController, tabs: _tabs),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -39,8 +44,21 @@ class _AddTransactionScreenState extends State<AddTransactionScreen>
           ),
         ],
       ),
-      // TODO: 移除TabBarView页面，改为头部是一个表单设置交易类型，点击切换
-      body: TabBarView(controller: _tabController, children: _tabPages),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TransactionTypeSelector(
+            selected: _selectedType,
+            segments: _segments,
+            onSelectionChanged: (selected) {
+              setState(() {
+                _selectedType = selected;
+              });
+            },
+          ),
+          AddTransactionForm(),
+        ],
+      ),
     );
   }
 }
