@@ -55,12 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [SliverToBoxAdapter(child: Dashboard())];
-          },
-          body: const RecentTransactions(),
-        ),
+        child: ListView(children: [Dashboard(), RecentTransactions()]),
       ),
     );
   }
