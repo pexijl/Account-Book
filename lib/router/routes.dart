@@ -25,8 +25,8 @@ class _RoutesState extends State<Routes> {
       routes: routes,
       // --- 在这里添加全局修复逻辑 ---
       builder: (BuildContext context, Widget? child) {
-        final MediaQueryData mediaQuery = MediaQuery.of(context);
-        double safeTop = mediaQuery.padding.top;
+        final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
+        double safeTop = mediaQuery?.padding.top ?? 0;
 
         // 适配小米/澎湃系统小窗 Bug
         if (safeTop > 80 || safeTop < 0) {
@@ -34,7 +34,7 @@ class _RoutesState extends State<Routes> {
         }
 
         return MediaQuery(
-          data: mediaQuery.copyWith(
+          data: mediaQuery!.copyWith(
             padding: mediaQuery.padding.copyWith(top: safeTop),
           ),
           child: child ?? const SizedBox.shrink(),
