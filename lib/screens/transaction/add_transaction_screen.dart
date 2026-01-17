@@ -97,13 +97,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     if (_formKey.currentState!.validate()) {
       try {
         print('保存: $transactionForm');
-        // await _transactionService.addTransactionByForm(form: transactionForm);
-        // if (mounted) {
-        //   ScaffoldMessenger.of(
-        //     context,
-        //   ).showSnackBar(const SnackBar(content: Text('支出已保存')));
-        //   Navigator.pop(context);
-        // }
+        await _transactionService.addTransactionByForm(form: transactionForm);
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('支出已保存')));
+          Navigator.pop(context);
+        }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(

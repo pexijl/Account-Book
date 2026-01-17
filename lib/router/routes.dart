@@ -2,6 +2,7 @@ import 'package:account_book/screens/main/main_screen.dart';
 import 'package:account_book/screens/settings/settings_screen.dart';
 import 'package:account_book/screens/transaction/add_transaction_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 class Routes extends StatefulWidget {
   const Routes({super.key});
@@ -23,6 +24,16 @@ class _RoutesState extends State<Routes> {
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/addTransaction', // TODO: 重置回 '/'
       routes: routes,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale('zh', 'CN'), // 中文简体
+        const Locale('en', 'US'), // 英语
+      ],
+      locale: const Locale('zh', 'CN'),
       // --- 在这里添加全局修复逻辑 ---
       builder: (BuildContext context, Widget? child) {
         final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);

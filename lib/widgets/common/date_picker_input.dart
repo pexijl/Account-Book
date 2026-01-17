@@ -1,52 +1,35 @@
 import 'package:flutter/material.dart';
 
 class DatePickerInput extends StatefulWidget {
-  final DateTime initialDate;
-  final DateTime firstDate;
-  final DateTime lastDate;
-  final ValueChanged<DateTime>? onDateChanged;
-  final String labelText;
-  final IconData icon;
+  final TextEditingController? controller;
+  final ValueChanged<DateTime> onChanged;
 
-  DatePickerInput({
-    super.key,
-    required this.initialDate,
-    required this.onDateChanged,
-    DateTime? firstDate,
-    DateTime? lastDate,
-    this.labelText = '日期',
-    this.icon = Icons.calendar_today,
-  }) : firstDate = firstDate ?? DateTime(2000),
-       lastDate = lastDate ?? DateTime(2101);
+  const DatePickerInput({super.key, this.controller, required this.onChanged});
 
   @override
   State<DatePickerInput> createState() => _DatePickerInputState();
 }
 
 class _DatePickerInputState extends State<DatePickerInput> {
-  late DateTime _selectedDate;
   late TextEditingController _controller;
 
   @override
   void initState() {
     super.initState();
-    _selectedDate = widget.initialDate;
-    _controller = TextEditingController(text: _formatDate(_selectedDate));
+    _controller = widget.controller ?? TextEditingController();
+    _controller.text = _formatDate(DateTime.now());
   }
 
   @override
   void didUpdateWidget(DatePickerInput oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // 当外部的 initialDate 更新时，同步更新内部状态
-    if (oldWidget.initialDate != widget.initialDate) {
-      _selectedDate = widget.initialDate;
-      _controller.text = _formatDate(_selectedDate);
-    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -57,16 +40,17 @@ class _DatePickerInputState extends State<DatePickerInput> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
-      firstDate: widget.firstDate,
-      lastDate: widget.lastDate,
+      initialDate: _controller.text.isNotEmpty
+          ? DateTime.parse(_controller.text)
+          : DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
     );
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null) {
       setState(() {
-        _selectedDate = picked;
-        _controller.text = _formatDate(_selectedDate);
+        _controller.text = _formatDate(picked);
       });
-      widget.onDateChanged?.call(picked);
+      widget.onChanged.call(picked);
     }
   }
 
@@ -79,9 +63,9 @@ class _DatePickerInputState extends State<DatePickerInput> {
         onTap: () => _selectDate(context),
         controller: _controller,
         decoration: InputDecoration(
-          labelText: widget.labelText,
+          labelText: "日期",
           border: const OutlineInputBorder(),
-          prefixIcon: Icon(widget.icon),
+          prefixIcon: const Icon(Icons.calendar_today),
           suffixIcon: const Icon(Icons.arrow_drop_down),
         ),
       ),

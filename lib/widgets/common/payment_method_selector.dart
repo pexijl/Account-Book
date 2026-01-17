@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 
 class PaymentMethodSelector extends StatefulWidget {
-  final String? initialSelection;
-  final ValueChanged<String?>? onSelected;
-  final String labelText;
-  final IconData icon;
+  final TextEditingController? controller;
+  final ValueChanged<String?> onChanged;
 
   const PaymentMethodSelector({
     super.key,
-    this.initialSelection,
-    this.onSelected,
-    this.labelText = '支付方式',
-    this.icon = Icons.payment,
+    this.controller,
+    required this.onChanged,
   });
 
   @override
@@ -19,8 +15,8 @@ class PaymentMethodSelector extends StatefulWidget {
 }
 
 class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
-  String? _selectedPaymentMethod;
   late TextEditingController _controller;
+  final _fieldKey = GlobalKey<FormFieldState>();
 
   // TODO: 从sqllite 中获取支付方式列表
   final List<PaymentMethodOption<String>> paymentMethods = [
@@ -34,23 +30,14 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
   @override
   void initState() {
     super.initState();
-    _selectedPaymentMethod = widget.initialSelection;
-    _controller = TextEditingController(text: _selectedPaymentMethod ?? '');
-  }
-
-  @override
-  void didUpdateWidget(PaymentMethodSelector oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // 当 widget 的 initialSelection 更新时，同步更新控制器
-    if (oldWidget.initialSelection != widget.initialSelection) {
-      _selectedPaymentMethod = widget.initialSelection;
-      _controller.text = _selectedPaymentMethod ?? '';
-    }
+    _controller = widget.controller ?? TextEditingController();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -61,15 +48,15 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
         return AlertDialog(
           title: Row(
             children: [
-              Icon(widget.icon, color: Colors.blue),
+              Icon(Icons.payment, color: Colors.blue),
               const SizedBox(width: 8),
-              Text('选择${widget.labelText}'),
+              Text('选择支付方式'),
             ],
           ),
           content: SizedBox(
             width: double.maxFinite,
             child: RadioGroup<String>(
-              groupValue: _selectedPaymentMethod,
+              groupValue: _controller.text,
               onChanged: (String? value) {
                 Navigator.of(context).pop(value);
               },
@@ -78,7 +65,7 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
                 itemCount: paymentMethods.length,
                 itemBuilder: (context, index) {
                   final method = paymentMethods[index];
-                  final isSelected = _selectedPaymentMethod == method.value;
+                  final isSelected = _controller.text == method.value;
 
                   return RadioListTile<String>(
                     title: Text(method.label),
@@ -106,16 +93,16 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
     );
 
     // 确保只在 selectedMethod 确实改变了时才更新状态
-    if (selectedMethod != null && selectedMethod != _selectedPaymentMethod) {
+    if (selectedMethod != null && selectedMethod != _controller.text) {
       // 使用 WidgetsBinding.instance.addPostFrameCallback 确保在当前构建完成后执行
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           // 检查 widget 是否仍然挂载
           setState(() {
-            _selectedPaymentMethod = selectedMethod;
             _controller.text = selectedMethod;
           });
-          widget.onSelected?.call(selectedMethod);
+          widget.onChanged.call(selectedMethod);
+          _fieldKey.currentState?.validate();
         }
       });
     }
@@ -126,19 +113,20 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
+        key: _fieldKey,
         readOnly: true,
         onTap: _showPaymentMethodDialog,
         controller: _controller,
         decoration: InputDecoration(
-          labelText: widget.labelText,
+          labelText: '支付方式',
           border: const OutlineInputBorder(),
-          prefixIcon: Icon(widget.icon),
+          prefixIcon: Icon(Icons.payment),
           suffixIcon: const Icon(Icons.arrow_drop_down),
-          hintText: '请选择${widget.labelText}',
+          hintText: '请选择支付方式',
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return '请选择${widget.labelText}';
+            return '请选择支付方式';
           }
           return null;
         },

@@ -3,30 +3,30 @@ import 'package:flutter/services.dart';
 
 class AmountInput extends StatefulWidget {
   final TextEditingController? controller;
-  final String? labelText;
-  final ValueChanged<String>? onChanged;
-  final String prefixText;
+  final ValueChanged<String> onChanged;
 
-  const AmountInput({
-    super.key,
-    this.controller,
-    this.labelText = '金额',
-    this.onChanged,
-    this.prefixText = '¥ ',
-  });
+  const AmountInput({super.key, this.controller, required this.onChanged});
 
   @override
   State<AmountInput> createState() => _AmountInputState();
 }
 
 class _AmountInputState extends State<AmountInput> {
+  final String labelText = '金额';
+  final String prefixText = '￥';
+  final _fieldKey = GlobalKey<FormFieldState<String>>();
+  late TextEditingController _controller;
   @override
   void initState() {
     super.initState();
+    _controller = widget.controller ?? TextEditingController();
   }
 
   @override
   void dispose() {
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -35,11 +35,12 @@ class _AmountInputState extends State<AmountInput> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
-        controller: widget.controller,
+        key: _fieldKey,
+        controller: _controller,
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
-          labelText: widget.labelText,
-          prefixText: widget.prefixText,
+          labelText: labelText,
+          prefixText: prefixText,
           border: const OutlineInputBorder(),
         ),
         style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -51,6 +52,10 @@ class _AmountInputState extends State<AmountInput> {
             return '请输入金额';
           }
           return null;
+        },
+        onChanged: (value) {
+          widget.onChanged.call(value);
+          _fieldKey.currentState?.validate();
         },
       ),
     );

@@ -8,19 +8,17 @@ class CategoryItemModel {
 }
 
 // TODO: 添加自定义校验
-class CategorySelector extends StatelessWidget {
-  final TextEditingController controller;
-  final String? selectedCategory;
-  final Function(String) onCategorySelected;
-  final String title;
+class CategorySelector extends StatefulWidget {
+  final ValueChanged<String> onChanged;
 
-  CategorySelector({
-    super.key,
-    required this.controller,
-    required this.selectedCategory,
-    required this.onCategorySelected,
-    this.title = '分类',
-  });
+  const CategorySelector({super.key, required this.onChanged});
+
+  @override
+  State<CategorySelector> createState() => _CategorySelectorState();
+}
+
+class _CategorySelectorState extends State<CategorySelector> {
+  String selectedCategory = '';
 
   // TODO: 从sqllite 中获取分类列表
   final List<CategoryItemModel> categories = [
@@ -47,7 +45,7 @@ class CategorySelector extends StatelessWidget {
       alignment: Alignment.centerLeft,
       margin: const EdgeInsets.only(bottom: 16),
       child: Text(
-        title,
+        '分类',
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
       // TODO: 添加新增分类功能
@@ -57,7 +55,6 @@ class CategorySelector extends StatelessWidget {
   Widget _buildCategoryGrid() {
     return FormField<String>(
       validator: (value) {
-        print('CategorySelector validator value: $value');
         if (value == null || value.isEmpty) {
           return '请选择分类';
         }
@@ -84,12 +81,18 @@ class CategorySelector extends StatelessWidget {
                   field: field,
                   category: category,
                   isSelected: isSelected,
-                  onCategorySelected: onCategorySelected,
+                  onCategorySelected: (String categoryName) {
+                    setState(() {
+                      selectedCategory = categoryName;
+                    });
+                    widget.onChanged(categoryName);
+                  },
                 );
               },
             ),
             if (field.hasError)
               Container(
+                margin: const EdgeInsets.only(left: 16),
                 alignment: Alignment.centerLeft,
                 child: Text(
                   field.errorText ?? '',
@@ -133,7 +136,7 @@ class CategoryItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: isSelected
               ? Border.all(color: Theme.of(context).primaryColor, width: 2)
-              : Border.all(color: Colors.grey[300]!),
+              : Border.all(color: Colors.grey),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
