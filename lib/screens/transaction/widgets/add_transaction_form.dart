@@ -58,6 +58,7 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
               },
             ),
             // 支付方式选择
+            // TODO: 根据TransactionType动态显示支付方式选择器
             PaymentMethodSelector(
               onChanged: (String? value) {
                 setState(() {
@@ -66,6 +67,7 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
               },
             ),
             // 分类选择
+            // TODO: 根据TransactionType动态显示分类选择器
             CategorySelector(
               onChanged: (String categoryName) {
                 setState(() {

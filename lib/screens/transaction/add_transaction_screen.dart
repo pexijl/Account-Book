@@ -96,7 +96,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Future<void> _saveExpense() async {
     if (_formKey.currentState!.validate()) {
       try {
-        print('保存: $transactionForm');
         await _transactionService.addTransactionByForm(form: transactionForm);
         if (mounted) {
           ScaffoldMessenger.of(
