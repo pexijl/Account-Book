@@ -21,7 +21,7 @@ class NoteInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 20, bottom: 40),
+      margin: const EdgeInsets.only(top: 16, bottom: 40),
       child: TextFormField(
         controller: controller,
         decoration: InputDecoration(
